@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <color name="colorPrimary">#FF9800</color>
+    <color name="colorPrimaryDark">#FF5722</color>
+    <color name="colorPrimaryLight">#FFC107</color>
+
+
+    <color name="colorAccent">#8BC34A</color>
+    <color name="colorIncome">#F3E69CE0</color>
+
+
+    <color name="colorPrimary_text">#212121</color>
+    <color name="colorSecondary_text">#03A9F4</color>
+
+    <color name="colorIcons">#FFFFFF</color>
+    <color name="colorDivider">#BDBDBD</color>
+
+    <color name="colorBackground">#FFFFF2</color>
+    <color name="colorDatePicker">#03A9F4</color>
+
+    <color name="mdtp_accent_color">#03A9F4</color>
+    <color name="mdtp_accent_color_dark">#00796b</color>
+
+
+    <color name="colorOrange">#FF9800</color>
+    <color name="colorBackgroundChart">#F1F1C9</color>
+
+    <color name="colorTest">#8BC34A</color>
+
+
+</resources>

@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">Tally · 记账</string>
+
+    <string name="add_new_record">添加</string>
+    <string name="add_new_record_short">添加</string>
+    <string name="shortcut_disable_msg">暂不可用</string>
+
+</resources>

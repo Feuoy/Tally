@@ -1,0 +1,517 @@
+<html>
+<head>
+<title>CurveReportActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #000080; font-weight: bold;}
+.s1 { color: #000000;}
+.s2 { color: #008000; font-weight: bold;}
+.s3 { color: #808080; font-style: italic;}
+.s4 { color: #0000ff;}
+.s5 { color: #808080; font-weight: bold; font-style: italic;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+CurveReportActivity.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span>com.feuoy.tally.activity;
+
+<span class="s0">import </span>java.util.ArrayList;
+<span class="s0">import </span>java.util.Calendar;
+<span class="s0">import </span>java.util.LinkedList;
+<span class="s0">import </span>java.util.List;
+
+<span class="s0">import </span>android.graphics.Color;
+<span class="s0">import </span>android.graphics.Paint;
+<span class="s0">import </span>android.os.Bundle;
+<span class="s0">import </span>android.util.Log;
+<span class="s0">import </span>android.view.View;
+<span class="s0">import </span>android.widget.EditText;
+
+<span class="s0">import </span>androidx.appcompat.app.AppCompatActivity;
+
+<span class="s0">import </span>com.feuoy.tally.R;
+<span class="s0">import </span>com.feuoy.tally.bean.CurveReportBean;
+<span class="s0">import </span>com.feuoy.tally.bean.RecordBean;
+<span class="s0">import </span>com.feuoy.tally.util.GlobalUtil;
+<span class="s0">import </span>com.github.mikephil.charting.charts.LineChart;
+<span class="s0">import </span>com.github.mikephil.charting.components.AxisBase;
+<span class="s0">import </span>com.github.mikephil.charting.components.Description;
+<span class="s0">import </span>com.github.mikephil.charting.components.Legend;
+<span class="s0">import </span>com.github.mikephil.charting.components.XAxis;
+<span class="s0">import </span>com.github.mikephil.charting.components.YAxis;
+<span class="s0">import </span>com.github.mikephil.charting.data.Entry;
+<span class="s0">import </span>com.github.mikephil.charting.data.LineData;
+<span class="s0">import </span>com.github.mikephil.charting.data.LineDataSet;
+<span class="s0">import </span>com.github.mikephil.charting.formatter.ValueFormatter;
+<span class="s0">import </span>com.github.mikephil.charting.highlight.Highlight;
+<span class="s0">import </span>com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+<span class="s0">import </span>com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+<span class="s0">import </span>com.whiteelephant.monthpicker.MonthPickerDialog;
+
+<span class="s0">import static </span>com.feuoy.tally.bean.CurveReportBean.RecordType.RECORD_TYPE_EXPENSE;
+<span class="s0">import static </span>com.feuoy.tally.bean.CurveReportBean.RecordType.RECORD_TYPE_INCOME;
+
+
+<span class="s0">public class </span>CurveReportActivity <span class="s0">extends </span>AppCompatActivity <span class="s0">implements </span>OnChartValueSelectedListener {
+
+    
+    <span class="s0">private final </span>String TAG = <span class="s2">&quot;CurveReportActivity&quot;</span>;
+    
+    
+    <span class="s0">public </span>LineChart lineChart;
+    
+    <span class="s0">private </span>XAxis xAxis;                <span class="s3">//X轴</span>
+    <span class="s0">private </span>YAxis leftYAxis;            <span class="s3">//左侧Y轴</span>
+    <span class="s0">private </span>YAxis rightYaxis;           <span class="s3">//右侧Y轴</span>
+    
+    <span class="s0">private </span>Legend legend;              <span class="s3">//图例</span>
+    
+    
+    Calendar now = Calendar.getInstance();
+    String nowYear = String.valueOf(now.get(Calendar.YEAR));
+    
+    ArrayList&lt;ILineDataSet&gt; sets = <span class="s0">new </span>ArrayList&lt;ILineDataSet&gt;();
+    
+
+    @Override
+    <span class="s0">protected void </span>onCreate(Bundle savedInstanceState) {
+        <span class="s0">super</span>.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_curve_report);
+
+
+        <span class="s3">// 输入年月，默认当年</span>
+//        yearMonthText_2 = (EditText) findViewById(R.id.editText_year_month_2);
+
+
+//        tv_class_report_2 = (TextView)findViewById(R.id.tv_class_report_2);
+//        tv_class_report_2.setText(tv_string);
+
+
+        lineChart = (LineChart) findViewById(R.id.pichart_2);
+
+
+        <span class="s3">// X轴</span>
+        xAxis = lineChart.getXAxis();
+        <span class="s3">// 显示在底部</span>
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        <span class="s3">// 坐标最小值</span>
+        xAxis.setAxisMinimum(<span class="s4">0f</span>);
+        <span class="s3">// 间隔</span>
+        xAxis.setGranularity(<span class="s4">1f</span>);
+        <span class="s3">// 网格线否</span>
+        xAxis.setDrawGridLines(<span class="s0">true</span>);
+        <span class="s3">// 月份</span>
+        xAxis.setValueFormatter(<span class="s0">new </span>ValueFormatter() {
+            @Override
+            <span class="s0">public </span>String getAxisLabel(<span class="s0">float </span>value, AxisBase axis) {
+                <span class="s0">return </span>String.valueOf((<span class="s0">int</span>) value + <span class="s4">1</span>).concat(<span class="s2">&quot;月&quot;</span>);
+            }
+        });
+
+
+        <span class="s3">// 去掉右侧Y轴</span>
+        rightYaxis = lineChart.getAxisRight();
+        rightYaxis.setEnabled(<span class="s0">false</span>);
+        rightYaxis.setDrawGridLines(<span class="s0">false</span>);
+        rightYaxis.setAxisMinimum(<span class="s4">0f</span>);
+
+
+        <span class="s3">// 左侧网格线</span>
+        leftYAxis = lineChart.getAxisLeft();
+        <span class="s3">// 保证Y轴从0开始，不然会上移一点</span>
+        leftYAxis.setAxisMinimum(<span class="s4">0f</span>);
+        <span class="s3">// 网格线有</span>
+        leftYAxis.setDrawGridLines(<span class="s0">true</span>);
+
+
+        <span class="s3">// 折线标签</span>
+        legend = lineChart.getLegend();
+        <span class="s3">// 显示类型，LINE CIRCLE SQUARE EMPTY 等</span>
+        legend.setForm(Legend.LegendForm.SQUARE);
+        legend.setFormSize(<span class="s4">40f</span>);
+        legend.setFormLineWidth(<span class="s4">40f</span>);
+        legend.setFormToTextSpace(<span class="s4">10f</span>);
+        <span class="s3">// 字大小</span>
+        legend.setTextSize(<span class="s4">10f</span>);
+        <span class="s3">// 左下方</span>
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        <span class="s3">// 是否绘制在图表里面</span>
+        legend.setDrawInside(<span class="s0">false</span>);
+
+
+        <span class="s3">// lineChart</span>
+        // 是否展示网格线
+        lineChart.setDrawGridBackground(<span class="s0">true</span>);
+        <span class="s3">// 是否显示边界</span>
+        lineChart.setDrawBorders(<span class="s0">false</span>);
+        <span class="s3">// 是否可以拖动</span>
+        lineChart.setDragEnabled(<span class="s0">true</span>);
+        <span class="s3">// 是否有触摸事件</span>
+        lineChart.setTouchEnabled(<span class="s0">true</span>);
+        <span class="s3">// 设置XY轴动画效果</span>
+        lineChart.animateX(<span class="s4">1500</span>);
+        lineChart.animateY(<span class="s4">1500</span>);
+        <span class="s3">// 背景</span>
+        lineChart.setBackgroundColor(Color.rgb(<span class="s4">241</span>, <span class="s4">241</span>, <span class="s4">201</span>));
+        lineChart.setGridBackgroundColor(Color.rgb(<span class="s4">241</span>, <span class="s4">241</span>, <span class="s4">201</span>));
+
+
+        <span class="s3">// set数据</span>
+        sets = <span class="s0">new </span>ArrayList&lt;ILineDataSet&gt;();
+
+        sets.add(forExpense(nowYear, RECORD_TYPE_EXPENSE));
+        sets.add(forIncome(nowYear, RECORD_TYPE_INCOME));
+
+
+        <span class="s3">// data</span>
+        LineData data = <span class="s0">new </span>LineData(sets);
+
+        lineChart.setData(data);
+
+
+<span class="s3">//        // 去掉默认右下角标签</span>
+//        Description description = new Description();
+//        description.setText(&quot;&quot;);
+//        lineChart.setDescription(description);
+
+        // 描述信息
+        Description description = <span class="s0">new </span>Description();
+        description.setText(nowYear + <span class="s2">&quot;年 · 分类支出&quot;</span>);
+        description.setTextAlign(Paint.Align.RIGHT);
+        description.setTextSize(<span class="s4">20</span>);
+        description.setTextColor(Color.rgb(<span class="s4">3</span>, <span class="s4">169</span>, <span class="s4">244</span>));
+        lineChart.setDescription(description);
+
+
+        lineChart.invalidate();
+
+
+        handleDoneCurveReport();
+    }
+
+
+    <span class="s3">// </span>
+    <span class="s0">public </span>LineDataSet forExpense(String year, CurveReportBean.RecordType type) {
+
+        List&lt;CurveReportBean&gt; curveReports = getCurveReports(year, type);
+
+
+        <span class="s3">// 第一条，支出</span>
+
+        // value
+        ArrayList&lt;Entry&gt; values = <span class="s0">new </span>ArrayList&lt;Entry&gt;();
+        <span class="s0">for </span>(<span class="s0">int </span>i = <span class="s4">0</span>; i &lt; <span class="s4">12</span>; i++) {
+            <span class="s0">double </span>val = curveReports.get(i).getAmount();
+            values.add(<span class="s0">new </span>Entry(i, (<span class="s0">float</span>) val));
+        }
+
+
+        <span class="s3">// set</span>
+        LineDataSet set = <span class="s0">new </span>LineDataSet(values, <span class="s2">&quot;支出&quot;</span>);
+
+        <span class="s3">// 圆点</span>
+        set.setDrawCircles(<span class="s0">true</span>);
+        <span class="s3">// 圆点大小</span>
+        set.setCircleRadius(<span class="s4">3f</span>);
+        <span class="s3">// 圆点实心</span>
+        set.setDrawCircleHole(<span class="s0">false</span>);
+        <span class="s3">// 圆点值尺寸</span>
+        set.setValueTextSize(<span class="s4">15f</span>);
+
+
+        <span class="s3">// 线宽</span>
+        set.setLineWidth(<span class="s4">2f</span>);
+        <span class="s3">// 平滑</span>
+        set.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
+        <span class="s3">// 填充</span>
+        set.setDrawFilled(<span class="s0">true</span>);
+        set.setFormSize(<span class="s4">15.f</span>);
+        set.setFormLineWidth(<span class="s4">1f</span>);
+
+        <span class="s3">// 曲度</span>
+        set.setCubicIntensity(<span class="s4">0.8f</span>);
+
+
+        <span class="s3">// 圆点颜色</span>
+        set.setCircleColor(Color.argb(<span class="s4">250</span>, <span class="s4">3</span>, <span class="s4">169</span>, <span class="s4">244</span>));
+        <span class="s3">// 曲线颜色</span>
+        set.setColor(Color.argb(<span class="s4">250</span>, <span class="s4">3</span>, <span class="s4">169</span>, <span class="s4">244</span>));
+
+
+        <span class="s0">return </span>set;
+    }
+
+
+    <span class="s3">// </span>
+    <span class="s0">public </span>LineDataSet forIncome(String year, CurveReportBean.RecordType type) {
+
+
+        List&lt;CurveReportBean&gt; curveReports = getCurveReports(year, type);
+
+
+
+        <span class="s3">/*-------------------------------*/</span>
+        // 第二条，收入
+        // value
+        ArrayList&lt;Entry&gt; values = <span class="s0">new </span>ArrayList&lt;Entry&gt;();
+        <span class="s0">for </span>(<span class="s0">int </span>i = <span class="s4">0</span>; i &lt; <span class="s4">12</span>; i++) {
+            <span class="s0">double </span>val = curveReports.get(i).getAmount();
+            values.add(<span class="s0">new </span>Entry(i, (<span class="s0">float</span>) val));
+        }
+
+        <span class="s3">// set</span>
+        LineDataSet set = <span class="s0">new </span>LineDataSet(values, <span class="s2">&quot;收入&quot;</span>);
+
+        <span class="s3">// 圆点</span>
+        set.setDrawCircles(<span class="s0">true</span>);
+        <span class="s3">// 圆点大小</span>
+        set.setCircleRadius(<span class="s4">3f</span>);
+        <span class="s3">// 圆点实心</span>
+        set.setDrawCircleHole(<span class="s0">false</span>);
+        <span class="s3">// 圆点值尺寸</span>
+        set.setValueTextSize(<span class="s4">15f</span>);
+
+
+        <span class="s3">// 线宽</span>
+        set.setLineWidth(<span class="s4">1f</span>);
+        <span class="s3">// 平滑</span>
+        set.setMode(LineDataSet.Mode.HORIZONTAL_BEZIER);
+        <span class="s3">// 填充</span>
+        set.setDrawFilled(<span class="s0">true</span>);
+        set.setFormSize(<span class="s4">15.f</span>);
+        set.setFormLineWidth(<span class="s4">1f</span>);
+
+        <span class="s3">// 曲度</span>
+        set.setCubicIntensity(<span class="s4">0.8f</span>);
+
+
+        <span class="s3">// 圆点颜色</span>
+        set.setCircleColor(Color.argb(<span class="s4">250</span>, <span class="s4">255</span>, <span class="s4">87</span>, <span class="s4">34</span>));
+        <span class="s3">// 曲线颜色</span>
+        set.setColor(Color.argb(<span class="s4">200</span>, <span class="s4">255</span>, <span class="s4">87</span>, <span class="s4">34</span>));
+
+        <span class="s0">return </span>set;
+    }
+
+
+    <span class="s3">// 获取每个CurveReportBean</span>
+    <span class="s0">private </span>List&lt;CurveReportBean&gt; getCurveReports(String year, CurveReportBean.RecordType type) {
+
+<span class="s3">//        List&lt;CurveReportBean&gt; curveReports = new ArrayList&lt;&gt;();</span>
+//
+//        curveReports.add(new CurveReportBean(&quot;2019&quot;, &quot;01&quot;, type,1000.2));
+//        curveReports.add(new CurveReportBean(&quot;2019&quot;, &quot;07&quot;, type,6000.2));
+//        curveReports.add(new CurveReportBean(&quot;2019&quot;, &quot;12&quot;, type,2000.2));
+//        curveReports.add(new CurveReportBean(&quot;2019&quot;, &quot;12&quot;, type,3000.2));
+
+
+        Log.d(<span class="s2">&quot;type------&quot;</span>, type + <span class="s2">&quot; &quot;</span>);
+
+
+        <span class="s0">int </span>type_true = type == RECORD_TYPE_EXPENSE ? <span class="s4">1 </span>: <span class="s4">2</span>;
+
+        Log.d(<span class="s2">&quot;type_true------&quot;</span>, type_true + <span class="s2">&quot; &quot;</span>);
+
+
+        <span class="s3">// 列出所有月份的curveReports，初始化月份，金额</span>
+        List&lt;CurveReportBean&gt; curveReports = <span class="s0">new </span>ArrayList&lt;&gt;();
+
+        String[] months = {
+                <span class="s2">&quot;01&quot;</span>, <span class="s2">&quot;02&quot;</span>, <span class="s2">&quot;03&quot;</span>, <span class="s2">&quot;04&quot;</span>,
+                <span class="s2">&quot;05&quot;</span>, <span class="s2">&quot;06&quot;</span>, <span class="s2">&quot;07&quot;</span>, <span class="s2">&quot;08&quot;</span>,
+                <span class="s2">&quot;09&quot;</span>, <span class="s2">&quot;10&quot;</span>, <span class="s2">&quot;11&quot;</span>, <span class="s2">&quot;12&quot;</span>,
+        };
+
+        <span class="s0">for </span>(String month : months) {
+            curveReports.add(<span class="s0">new </span>CurveReportBean(year, month, type, <span class="s4">0</span>));
+        }
+
+
+        <span class="s3">// 遍历reconds</span>
+        LinkedList&lt;RecordBean&gt; records;
+        <span class="s0">if </span>(type == RECORD_TYPE_EXPENSE) {
+            records = GlobalUtil.getInstance().dbHelper.getRecordsByType(<span class="s4">1</span>);
+        } <span class="s0">else </span>{
+            records = GlobalUtil.getInstance().dbHelper.getRecordsByType(<span class="s4">2</span>);
+        }
+
+
+        <span class="s0">for </span>(<span class="s0">int </span>i = <span class="s4">0</span>; i &lt; records.size(); i++) {
+            String record_year = records.get(i).getDate().substring(<span class="s4">0</span>, <span class="s4">4</span>); <span class="s3">// 2019</span>
+            String record_month = records.get(i).getDate().substring(<span class="s4">5</span>, <span class="s4">7</span>); <span class="s3">// 08</span>
+
+            Log.d(<span class="s2">&quot;record_month------&quot;</span>, type_true + <span class="s2">&quot; &quot; </span>+ record_month);
+
+            <span class="s3">// 筛选年份</span>
+            <span class="s0">if </span>(!record_year.equals(year)) {
+                <span class="s0">continue</span>;
+            }
+
+
+            <span class="s3">// 月份、支出类型相同的，加金额</span>
+            <span class="s0">for </span>(<span class="s0">int </span>j = <span class="s4">0</span>; j &lt; curveReports.size(); j++) {
+                <span class="s0">if </span>(record_month.equals(curveReports.get(j).getMonth())
+                        &amp;&amp; records.get(i).getType() == type_true) {
+
+                    Log.d(<span class="s2">&quot;records.get(i).getAmount()------&quot;</span>, type_true + <span class="s2">&quot; &quot; </span>+ records.get(i).getAmount() + <span class="s2">&quot;&quot;</span>);
+
+
+                    curveReports.get(j).setAmount(curveReports.get(j).getAmount() + records.get(i).getAmount());
+                }
+            }
+        }
+
+        Log.d(<span class="s2">&quot;curveReports------&quot;</span>, curveReports.toString());
+
+
+        <span class="s0">return </span>curveReports;
+    }
+
+
+    <span class="s3">// 查询，按年</span>
+    <span class="s0">private void </span>handleDoneCurveReport() {
+        findViewById(R.id.done_to_read_2).setOnClickListener(<span class="s0">new </span>View.OnClickListener() {
+            @Override
+            <span class="s0">public void </span>onClick(View v) {
+
+
+                MonthPickerDialog.Builder builder = <span class="s0">new </span>MonthPickerDialog.Builder(
+                        CurveReportActivity.<span class="s0">this</span>,
+                        <span class="s0">new </span>MonthPickerDialog.OnDateSetListener() {
+                            @Override
+                            <span class="s0">public void </span>onDateSet(<span class="s0">int </span>selectedMonth, <span class="s0">int </span>selectedYear) {
+                                <span class="s3">// on date set</span>
+
+
+                                nowYear = <span class="s2">&quot;&quot; </span>+ selectedYear;
+
+                                Log.d(<span class="s2">&quot;2yearMonth----&quot;</span>, <span class="s2">&quot;&quot; </span>+ nowYear);
+
+                                List&lt;CurveReportBean&gt; theClassReport_EXPENSE = getCurveReports(nowYear, RECORD_TYPE_EXPENSE);
+                                List&lt;CurveReportBean&gt; theClassReport_INCOME = getCurveReports(nowYear, RECORD_TYPE_INCOME);
+<span class="s3">//</span>
+//                              // 更新图表
+                                updateChart(theClassReport_EXPENSE, theClassReport_INCOME);
+
+
+                            }
+                        }, now.get(Calendar.YEAR), now.get(Calendar.MONTH));
+
+
+                builder.setTitle(<span class="s2">&quot;&quot;</span>)
+                        .setMinYear(<span class="s4">2000</span>)
+                        .setMaxYear(<span class="s4">2030</span>)
+                        .showYearOnly()
+                        .setOnYearChangedListener(<span class="s0">new </span>MonthPickerDialog.OnYearChangedListener() {
+                            @Override
+                            <span class="s0">public void </span>onYearChanged(<span class="s0">int </span>selectedYear) {
+                                <span class="s3">// on year selected</span>
+                            }
+                        })
+                        .build()
+                        .show();
+
+
+                <span class="s3">// 输入获取</span>
+////                tv_string = nowYear + &quot;年 · 收支曲线&quot;;
+////                tv_class_report_2.setText(tv_string);
+//
+//                nowYear = yearMonthText_2.getText().toString();
+//
+//                // 年月不为空
+//                if (!nowYear.equals(&quot;&quot;)) {
+//
+//
+//                    String pattern = &quot;^[0-9]{4}$&quot;;
+//                    boolean isMatch = Pattern.matches(pattern, nowYear);
+//                    Log.d(&quot;nowYear----&quot;, nowYear);
+//
+//                    if (isMatch) {
+//                        List&lt;CurveReportBean&gt; theClassReport_EXPENSE = getCurveReports(nowYear, RECORD_TYPE_EXPENSE);
+//                        List&lt;CurveReportBean&gt; theClassReport_INCOME = getCurveReports(nowYear, RECORD_TYPE_INCOME);
+//
+//                        // 更新图表
+//                        updateChart(theClassReport_EXPENSE, theClassReport_INCOME);
+//
+//
+//                    } else {
+//                        Toast.makeText(getApplicationContext(), &quot; 请输入如‘2020’ ~ &quot;, Toast.LENGTH_SHORT).show();
+//                    }
+//                } else {
+//                    Toast.makeText(getApplicationContext(), &quot; 查询年份不可为空 ~ &quot;, Toast.LENGTH_SHORT).show();
+//                }
+
+            }
+
+        });
+    }
+
+
+    <span class="s3">// 查询确定，刷新表</span>
+    <span class="s0">public void </span>updateChart(List&lt;CurveReportBean&gt; theClassReport_EXPENSE, List&lt;CurveReportBean&gt; theClassReport_INCOME) {
+
+        <span class="s3">// set数据</span>
+        sets = <span class="s0">new </span>ArrayList&lt;ILineDataSet&gt;();
+
+
+        sets.add(forExpense(nowYear, RECORD_TYPE_EXPENSE));
+        sets.add(forIncome(nowYear, RECORD_TYPE_INCOME));
+
+
+        <span class="s3">// data</span>
+        LineData data = <span class="s0">new </span>LineData(sets);
+
+        lineChart.setData(data);
+
+
+<span class="s3">//        // 去掉默认右下角标签</span>
+//        Description description = new Description();
+//        description.setText(&quot;&quot;);
+//        lineChart.setDescription(description);
+
+
+        // 描述信息
+        Description description = <span class="s0">new </span>Description();
+        description.setText(nowYear + <span class="s2">&quot;年 · 分类支出&quot;</span>);
+        description.setTextAlign(Paint.Align.RIGHT);
+        description.setTextSize(<span class="s4">20</span>);
+        description.setTextColor(Color.rgb(<span class="s4">3</span>, <span class="s4">169</span>, <span class="s4">244</span>));
+        lineChart.setDescription(description);
+
+        <span class="s3">// 设置XY轴动画效果</span>
+        lineChart.animateX(<span class="s4">1500</span>);
+        lineChart.animateY(<span class="s4">1500</span>);
+
+        lineChart.invalidate();
+    }
+
+
+    <span class="s3">/**</span>
+     * Called when a value has been selected inside the chart.
+     *
+     * <span class="s5">@param </span><span class="s3">e The selected Entry</span>
+     * <span class="s5">@param </span><span class="s3">h The corresponding highlight object that contains information</span>
+     */
+    @Override
+    <span class="s0">public void </span>onValueSelected(Entry e, Highlight h) {
+
+    }
+
+    <span class="s3">/**</span>
+     * Called when nothing has been selected or an &quot;un-select&quot; has been made.
+     */
+    @Override
+    <span class="s0">public void </span>onNothingSelected() {
+
+    }
+
+}
+</pre>
+</body>
+</html>

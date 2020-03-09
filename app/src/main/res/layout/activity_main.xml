@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:fitsSystemWindows="true"
+    tools:context=".activity.MainActivity">
+
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:orientation="vertical"
+        app:elevation="0dp">
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <RelativeLayout
+                android:id="@+id/amount_layout"
+                android:layout_width="match_parent"
+                android:layout_height="80dp">
+
+
+                <!-- TickerView，实现动画效果 -->
+                <com.robinhood.ticker.TickerView
+                    android:id="@+id/amount_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="10dp"
+                    android:textColor="@android:color/white"
+                    android:textSize="60dp" />
+
+
+                <TextView
+                    android:id="@+id/currency_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/amount_text"
+                    android:layout_toEndOf="@+id/amount_text"
+                    android:layout_toRightOf="@+id/amount_text"
+                    android:text="元"
+                    android:textColor="@android:color/white"
+                    android:textSize="60dp" />
+
+
+            </RelativeLayout>
+
+
+            <TextView
+                android:id="@+id/date_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/amount_layout"
+                android:layout_centerHorizontal="true"
+                android:text="周 五"
+                android:textColor="#FFEB3B"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+
+        </RelativeLayout>
+
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:src="@drawable/bubble"
+        app:layout_anchor="@id/app_bar_layout"
+        app:layout_anchorGravity="bottom|end" />
+
+
+    <include layout="@layout/viewpager_main" />
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
